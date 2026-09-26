@@ -1,0 +1,66 @@
+@startuml
+title MVC-структура приложения для инвертирования слов
+
+package "org.example.model" {
+    interface ModelListener {
+        +modelChanged(model: WordInversionModel)
+    }
+
+    class WordInversionModel {
+        -listeners: List<ModelListener>
+        -sourceSentence: String
+        -invertedSentence: String
+        +getSourceSentence(): String
+        +getInvertedSentence(): String
+        +setSourceSentence(sourceSentence: String): void
+        +addListener(listener: ModelListener): void
+        -notifyListeners(): void
+        -invertWords(sentence: String): String
+        -appendReversedWord(result: StringBuilder, word: StringBuilder): void
+    }
+}
+
+package "org.example.view" {
+    class MainFrame {
+        -sourceArea: JTextArea
+        -resultArea: JTextArea
+        -inputButton: JButton
+        +setInputAction(listener: ActionListener): void
+        +showInputDialog(initialSentence: String): String
+        +showError(message: String): void
+        +updateFromModel(model: WordInversionModel): void
+        +modelChanged(model: WordInversionModel): void
+    }
+
+    class InputDialog {
+        -sentenceArea: JTextArea
+        -result: String
+        +getResult(): String
+    }
+}
+
+package "org.example.controller" {
+    class WordInversionController {
+        -model: WordInversionModel
+        -view: MainFrame
+        -requestSentence(): void
+    }
+}
+
+class Main {
+    +main(args: String[]): void
+}
+
+ModelListener <|.. MainFrame
+JFrame <|-- MainFrame
+JDialog <|-- InputDialog
+
+WordInversionModel o-- ModelListener : уведомляет
+WordInversionController --> WordInversionModel : изменяет данные
+WordInversionController --> MainFrame : обрабатывает ввод
+MainFrame --> InputDialog : открывает окно
+Main --> WordInversionModel : создает
+Main --> MainFrame : создает
+Main --> WordInversionController : создает
+
+@enduml
